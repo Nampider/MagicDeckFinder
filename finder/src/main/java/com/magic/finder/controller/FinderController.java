@@ -1,22 +1,22 @@
 package com.magic.finder.controller;
 
-import org.openqa.selenium.JavascriptExecutor;
+import org.checkerframework.checker.units.qual.A;
+import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.htmlunit.WebClient;
 import org.htmlunit.html.HtmlPage;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -71,66 +71,52 @@ public class FinderController {
     }
 
     @GetMapping("/search/{cardName}")
-    public Mono<String> getCardLink(@PathVariable String cardName){
-        //https://www.tcgplayer.com/search/all/product?q=urza%27s+mine&view=grid
-        // Set up ChromeOptions for headless mode (optional)
+    public Flux<String> getCardLink(@PathVariable String cardName){
+        // Set up ChromeOptions for headless mode
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless");  // Headless mode
-        options.addArguments("--disable-gpu"); // Disable GPU (optional)
+        options.addArguments("--headless"); // Headless mode
+        options.addArguments("--disable-gpu");
 
         WebDriver driver = new ChromeDriver(options);
-        JavascriptExecutor js = (JavascriptExecutor) driver;
 
         try {
-//            String regex = "[\\\\'\\\\+]";
-//            String regex = "[\\\\!\\\\@]";
-//            System.out.println("This is the cardName");
-//            System.out.println(cardName);
-//            String[] arr = cardName.split(regex);
-//            System.out.println(Arrays.toString(arr));
-//            System.out.println(length(arr));
-            //make sure to convert to UTF-8
+            // Set timeout for page load and implicit wait
+            driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(30)); // Wait for page load
+            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10)); // Implicit wait for finding elements
             System.out.println(cardName);
             String encoded = URLEncoder.encode(cardName, "UTF-8");
-            System.out.println("https://www.tcgplayer.com/search/all/product?q="+encoded);
-            // Navigate to the website
-            driver.get("https://www.tcgplayer.com/search/all/product?q=\"+encoded");
+            // Navigate to the URL
+            String url = "https://www.tcgplayer.com/search/all/product?q="+encoded;
+            driver.get(url);
 
-            // Wait for the #app div to be visible and populated with content
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
-            wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("app")));
-            wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("horizontal-filters-bar")));
-            wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("search-layout-hfb")));
-            wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("search-results")));
-            wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("search-result")));
-            wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("search-result__content")));
-            wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("search-result__product")));
-//href="/product/11288/magic-8th-edition-urzas-mine?page=1"
-            // Find the #app div (or any other parent div you're interested in)
-            WebElement appDiv = driver.findElement(By.id("app"));
+            // Wait for the dynamic content to load (without explicitly waiting for elements)
+            Thread.sleep(5000); // Just give a little buffer for dynamic content to load
 
-            // Get the outer HTML of the #app div (including all nested elements)
-            String appContent = appDiv.getAttribute("outerHTML");
-            System.out.println("Full HTML inside #app:\n" + appContent);
-
+            // Now get the entire page source
+            String pageSource = driver.getPageSource();
+            System.out.println(pageSource);
             // Find all <a> tags on the page
             List<WebElement> anchors = driver.findElements(By.tagName("a"));
-
+            List<String> linkList = new ArrayList<>();
 // Iterate through the list and print out the href attributes
             for (WebElement anchor : anchors) {
                 String href = anchor.getAttribute("href");
                 System.out.println("Found href: " + href);
+                if (href!=null && href.contains("/product/")){
+                    linkList.add("\n"+href);
+                }
             }
-            return Mono.just(appContent);
-            // If you only need the inner HTML (without the parent <div> tag itself), use:
-            // String innerHtml = appDiv.getAttribute("innerHTML");
-            // System.out.println("Inner HTML inside #app:\n" + innerHtml);
-
+            return Flux.fromIterable(linkList);
+        } catch (TimeoutException e) {
+            System.out.println("Page took too long to load.");
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         } finally {
             // Close the browser
             driver.quit();
         }
+        return Flux.fromIterable(new ArrayList<>());
     }
 }
