@@ -95,6 +95,7 @@ public class FinderController {
             // Now get the entire page source
             String pageSource = driver.getPageSource();
             System.out.println(pageSource);
+            String[] cardSplit = cardName.split(" ");
             // Find all <a> tags on the page
             List<WebElement> anchors = driver.findElements(By.tagName("a"));
             List<String> linkList = new ArrayList<>();
@@ -102,7 +103,7 @@ public class FinderController {
             for (WebElement anchor : anchors) {
                 String href = anchor.getAttribute("href");
                 System.out.println("Found href: " + href);
-                if (href!=null && href.contains("/product/")){
+                if (href!=null && href.contains("/product/") && (href.contains(cardSplit[0].toLowerCase()) || href.contains(cardSplit[0]) )){
                     linkList.add("\n"+href);
                 }
             }
