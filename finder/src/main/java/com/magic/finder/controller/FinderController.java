@@ -16,11 +16,10 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static org.apache.commons.io.IOUtils.length;
+import static org.apache.commons.io.IOUtils.resourceToByteArray;
 
 @RestController
 public class FinderController {
@@ -81,8 +80,8 @@ public class FinderController {
 
         try {
             // Set timeout for page load and implicit wait
-            driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(30)); // Wait for page load
-            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10)); // Implicit wait for finding elements
+            driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(10000)); // Wait for page load
+            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10000)); // Implicit wait for finding elements
             System.out.println(cardName);
             String encoded = URLEncoder.encode(cardName, "UTF-8");
             // Navigate to the URL
@@ -90,13 +89,26 @@ public class FinderController {
             driver.get(url);
 
             // Wait for the dynamic content to load (without explicitly waiting for elements)
-            Thread.sleep(5000); // Just give a little buffer for dynamic content to load
-
+            Thread.sleep(10000); // Just give a little buffer for dynamic content to load
+            List<String> pageCount = new ArrayList<>();
             // Now get the entire page source
             String pageSource = driver.getPageSource();
-            System.out.println(pageSource);
+            System.out.println("this is the url");
+            System.out.println(url);
+//            System.out.println(pageSource);
             String[] cardSplit = cardName.split(" ");
             // Find all <a> tags on the page
+            List<WebElement> page = driver.findElements(By.className("tcg-button"));
+            for (WebElement button : page){
+                if (button.getAttribute("href")!=null && button.getAttribute("href").contains("page=")){
+                    pageCount.add(button.getAttribute("href"));
+                }
+            }
+            Set<String> pageCountSet = new HashSet<>(pageCount);
+            System.out.println("This is overall list");
+            System.out.println(pageCount);
+            System.out.println("This is the overall Set");
+            System.out.println(pageCountSet);
             List<WebElement> anchors = driver.findElements(By.tagName("a"));
             List<String> linkList = new ArrayList<>();
 // Iterate through the list and print out the href attributes
