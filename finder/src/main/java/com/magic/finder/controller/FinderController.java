@@ -1,5 +1,6 @@
 package com.magic.finder.controller;
 
+import com.magic.finder.processor.FinderProcessor;
 import org.checkerframework.checker.units.qual.A;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -23,6 +24,12 @@ import static org.apache.commons.io.IOUtils.resourceToByteArray;
 
 @RestController
 public class FinderController {
+
+    private final FinderProcessor finderProcessor;
+
+    public FinderController(FinderProcessor finderProcessor) {
+        this.finderProcessor = finderProcessor;
+    }
 
     @GetMapping("/test/{id}")
     public Mono<String> sayHello(@PathVariable Integer id) {
@@ -67,6 +74,11 @@ public class FinderController {
             driver.quit();
         }
         return Mono.just("Hello");
+    }
+
+    @GetMapping("/search/clean/{cardName}")
+    public Flux<String> getCardInformation(@PathVariable String cardName){
+        return finderProcessor.getSingleCard(cardName);
     }
 
     @GetMapping("/search/{cardName}")
