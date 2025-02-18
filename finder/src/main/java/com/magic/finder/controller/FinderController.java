@@ -1,12 +1,11 @@
 package com.magic.finder.controller;
 
+import com.magic.finder.dto.WebCrawlData;
 import com.magic.finder.processor.FinderProcessor;
 import org.checkerframework.checker.units.qual.A;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.htmlunit.WebClient;
 import org.htmlunit.html.HtmlPage;
 import reactor.core.publisher.Flux;
@@ -76,9 +75,9 @@ public class FinderController {
         return Mono.just("Hello");
     }
 
-    @GetMapping("/search/clean/{cardName}")
-    public Flux<String> getCardInformation(@PathVariable String cardName){
-        return finderProcessor.getSingleCard(cardName);
+    @PostMapping("/search/clean")
+    public Mono<Set<String>> getCardInformation(@RequestBody WebCrawlData webCrawlData){
+        return finderProcessor.getSingleCard(webCrawlData.getName());
     }
 
     @GetMapping("/search/{cardName}")
