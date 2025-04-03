@@ -4,6 +4,8 @@
 #Use selenium to filter through a website and pass those values (data) to an LLM
 
 #This is EXAMPLE CODE TO MAKE SURE THE venv is ignored
+#This is EXAMPLE CODE TO MAKE SURE THE venv is ignored number 2
+
 
 import streamlit as st
 from scrape import scrape_website
