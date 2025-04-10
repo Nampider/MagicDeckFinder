@@ -21,9 +21,9 @@ if st.button("Find Cards"):
 
     cleaned_content = clean_body_content(body_content)
 
-    st.session_state.dom_content = cleaned_content
+    st.session_state.dom_content = body_content
     with st.expander("View DOM Content"):
-        st.text_area("DOM Content", cleaned_content, height=300)
+        st.text_area("DOM Content", body_content, height=300)
 
 if "dom_content" in st.session_state:
     parse_description = st.text_area("Describe what you want to parse?")

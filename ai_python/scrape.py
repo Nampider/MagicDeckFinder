@@ -11,6 +11,7 @@ def scrape_website(website):
     
     chrome_driver_path = "./chromedriver" #For an application that allows us to control chrome
     options = webdriver.ChromeOptions() #specify how the chrome web driver operates   we can run i headless mode etc
+    options.add_argument('--headless')  # Enable headless modes
     driver = webdriver.Chrome(service = Service(chrome_driver_path), options=options)   #setup the actual driver (can use firefox whatever browser)
     
     try:
@@ -18,6 +19,8 @@ def scrape_website(website):
         print("Page Loaded")
         html = driver.page_source
         time.sleep(10)
+        print("This is the html")
+        print(html)
         return html
     finally:
         driver.quit()
