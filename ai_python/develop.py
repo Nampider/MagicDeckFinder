@@ -7,17 +7,16 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 
-# Setup Chrome driver
-options = Options()
-options.add_argument("--start-maximized")
 
-driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
-
-def web_scrape(driver: webdriver.Chrome, search_term: str = "Swamp"):
+def web_scrape(search_term: str):
+    options = Options()
+    options.add_argument("--start-maximized")
+    options.add_argument('headless')
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
     wait = WebDriverWait(driver, 10) 
     driver.get("https://darksidegames.com/")
 
-    # Wait and input the search term
+    # Search
     search_input = wait.until(
         EC.presence_of_element_located((By.CLASS_NAME, "search-bar__input"))
     )
@@ -27,50 +26,34 @@ def web_scrape(driver: webdriver.Chrome, search_term: str = "Swamp"):
     card_info = []
 
     while True:
-        # Wait for products to load
         wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, "productCard__title")))
-
-        # Grab product info
         prices = driver.find_elements(By.CLASS_NAME, "productCard__price")
         titles = driver.find_elements(By.CLASS_NAME, "productCard__title")
         stocks = driver.find_elements(By.CLASS_NAME, "productChip__active")
-        # sets = driver.find_elements(By.CLASS_NAME, "productCard__setName")
-    
-        # Safeguard for inconsistent list lengths
+        min_price_cards = []
         count = min(len(prices), len(titles), len(stocks))
-
         for i in range(count):
             title_text = titles[i].text.strip()
-            if search_term.strip().lower() in title_text.lower():
+            if search_term.strip().lower() in title_text.lower() and "art card" not in title_text.lower() and stocks[i].text.strip()!= "":
                 card_info.append({
                     "title": title_text,
                     "price": prices[i].text.strip(),
-                    "stock": stocks[i].text.strip(),
-                    # "set": sets[i].text.strip()
+                    # "stock": stocks[i].text.strip() if stocks[i].text.strip() else 0
+                    "stock": stocks[i].text.strip()
                 })
 
-        # Try to go to the next page
+        min_price_cards.append(min(card_info, key=lambda card: float(card["price"].replace("$", "").replace(" USD", ""))))
+        print("This is the min list")
+        print(min_price_cards)
+                
+
         try:
-            next_button = wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "pagination__next")))
-
-            # Check if it's disabled
-            if 'disabled' in next_button.get_attribute('class'):
-                break
-
-            # Wait for old products to become stale before clicking
-            first_card = titles[0]
-            next_button.click()
-            wait.until(EC.staleness_of(first_card))  # wait until content refreshes
+            next_button = wait.until(EC.element_to_be_clickable((By.PARTIAL_LINK_TEXT, "Next")))
+            driver.execute_script("arguments[0].scrollIntoView(true);", next_button)
+            driver.execute_script("arguments[0].click();", next_button)
+            wait.until(EC.staleness_of(titles[0]))
         except:
             break
 
-    return card_info
-
-# Call the function
-results = web_scrape(driver, "Swamp")
-
-print("\nCollected card data:")
-for card in results:
-    print(card)
-
-driver.quit()
+    driver.quit()
+    return min_price_cards[0]

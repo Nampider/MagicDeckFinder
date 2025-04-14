@@ -1,38 +1,19 @@
-#This is the main file.
-#Use selenium
+#This is the code for fasapi endpoint exposure that serves to connect the webscraping portion of the code with the restapi frontend
 
-#Use selenium to filter through a website and pass those values (data) to an LLM
+from fastapi import FastAPI
+from pydantic import BaseModel
+from typing import List
+import requests
+from develop import web_scrape
+from models import ScrapeRequest
+from typing import List
 
-#This is EXAMPLE CODE TO MAKE SURE THE venv is ignored
-#This is EXAMPLE CODE TO MAKE SURE THE venv is ignored number 2
+app = FastAPI()
 
-
-import streamlit as st
-from scrape import scrape_website, split_dom_content, clean_body_content,extract_body_content
-from parse import parse_with_ollama
-#Title for the website
-st.title("MTG Card List Reader")
-url = st.text_input("Enter a Card Name ")
-
-if st.button("Find Cards"):
-    st.write("Milking the cats....")
-    result = scrape_website(url)
-    body_content = extract_body_content(result)
-
-    cleaned_content = clean_body_content(body_content)
-
-    st.session_state.dom_content = cleaned_content
-    with st.expander("View DOM Content"):
-        st.text_area("DOM Content", cleaned_content, height=300)
-
-if "dom_content" in st.session_state:
-    parse_description = st.text_area("Describe what you want to parse?")
-
-    if st.button("Parse Content"):
-        if parse_description:
-            st.write("Parsing the content")
-
-            dom_chunks = split_dom_content(st.session_state.dom_content)
-            result = parse_with_ollama(dom_chunks, parse_description)
-            st.write(result)
-
+@app.post("/scrape")
+async def scrape_data(scrape_request: List[ScrapeRequest]):
+    all_results = []
+    for req in scrape_request:
+        result = web_scrape(req.name)
+        all_results.append(result)
+    return all_results
