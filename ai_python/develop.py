@@ -10,8 +10,13 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 def web_scrape(search_term: str):
     options = Options()
-    options.add_argument("--start-maximized")
-    options.add_argument('headless')
+    options.add_argument("--headless=new")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--disable-extensions")
+    options.add_argument("--blink-settings=imagesEnabled=false")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--window-size=1920,1080")
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
     wait = WebDriverWait(driver, 10) 
     driver.get("https://darksidegames.com/")
@@ -40,9 +45,10 @@ def web_scrape(search_term: str):
                     "price": prices[i].text.strip(),
                     # "stock": stocks[i].text.strip() if stocks[i].text.strip() else 0
                     "stock": stocks[i].text.strip()
-                })
+                })  
+        if card_info:
+            min_price_cards.append(min(card_info, key=lambda card: float(card["price"].replace("$", "").replace(" USD", ""))))
 
-        min_price_cards.append(min(card_info, key=lambda card: float(card["price"].replace("$", "").replace(" USD", ""))))
         print("This is the min list")
         print(min_price_cards)
                 
@@ -56,4 +62,4 @@ def web_scrape(search_term: str):
             break
 
     driver.quit()
-    return min_price_cards[0]
+    return min_price_cards
