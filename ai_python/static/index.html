@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Card Scraper</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+  <div class="container">
+    <h1>Card Scraper</h1>
+
+    <textarea id="cardInput" placeholder="Enter card names, one per line..."></textarea>
+
+    <div class="buttons">
+      <button onclick="scrapeCards()">Scrape Cards</button>
+      <button onclick="mockScrape()">Validate with Mock</button>
+    </div>
+
+    <div id="loading" class="hidden">Loading...</div>
+
+    <div id="results"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

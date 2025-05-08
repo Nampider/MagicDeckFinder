@@ -13,11 +13,37 @@ from fastapi.responses import JSONResponse
 import json
 
 
+from fastapi import FastAPI, HTTPException, status
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from typing import List
+import json, os
+
+from develop import web_scrape
+from validations.card_validation import validate_card_name
+from models import ErrorResponse
+
+app = FastAPI()
+
+# Serve static frontend files
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# Set CORS (optional if frontend served from same server)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 class ScrapeRequest(BaseModel):
     name: str
 
-
-app = FastAPI()
+@app.get("/")
+def serve_index():
+    return FileResponse("static/index.html")
 
 MAX_CONCURRENT = 40
 semaphore = asyncio.Semaphore(MAX_CONCURRENT)
