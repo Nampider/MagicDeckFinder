@@ -1,5 +1,5 @@
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, status
 from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel
 from typing import List
@@ -7,6 +7,10 @@ import asyncio
 from datetime import datetime
 
 from develop import web_scrape
+from validations.card_validation import validate_card_name
+from models import ErrorResponse
+from fastapi.responses import JSONResponse
+import json
 
 
 class ScrapeRequest(BaseModel):
@@ -51,3 +55,27 @@ async def scrape_data(scrape_request: List[ScrapeRequest]):
     end = datetime.now()
     print(f"[INFO] Completed scraping in {end - start}")
     return final_results
+
+
+@app.post("/mockScrape")
+def get_mock_cards(scrape_request: List[ScrapeRequest]):
+    errorCase = []
+    
+    for s in scrape_request:
+        if validate_card_name(s) == "Invalid Card Name":
+            errorCase.append(f"Card not found for {s}")
+        else:
+            continue
+    if errorCase:
+        error_response = ErrorResponse(
+            detail="Cards not found",
+            errors=errorCase
+        )
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=error_response.model_dump()
+        )
+    with open("mock_cards.json", "r") as f:
+        data = json.load(f)
+    return JSONResponse(content=data)
+
