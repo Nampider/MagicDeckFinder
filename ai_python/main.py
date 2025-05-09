@@ -28,7 +28,7 @@ from models import ErrorResponse
 app = FastAPI()
 
 # Serve static frontend files
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Set CORS (optional if frontend served from same server)
 app.add_middleware(
@@ -41,9 +41,9 @@ app.add_middleware(
 class ScrapeRequest(BaseModel):
     name: str
 
-@app.get("/")
-def serve_index():
-    return FileResponse("static/index.html")
+# @app.get("/")
+# def serve_index():
+#     return FileResponse("static/index.html")
 
 MAX_CONCURRENT = 40
 semaphore = asyncio.Semaphore(MAX_CONCURRENT)
