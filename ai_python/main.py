@@ -7,7 +7,7 @@ import asyncio
 from datetime import datetime
 
 from develop import web_scrape
-from validations.card_validation import validate_card_name
+from card_validation import validate_card_name
 from models import ErrorResponse
 from fastapi.responses import JSONResponse
 import json
