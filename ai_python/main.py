@@ -22,7 +22,7 @@ from typing import List
 import json, os
 
 from develop import web_scrape
-from validations.card_validation import validate_card_name
+from card_validation import validate_card_name
 from models import ErrorResponse
 
 app = FastAPI()
