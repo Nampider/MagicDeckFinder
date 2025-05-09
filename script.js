@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:8000";
+const BASE_URL = "https://magicdeckfinder.onrender.com";
 
 function getCardList() {
   const text = document.getElementById("cardInput").value;
