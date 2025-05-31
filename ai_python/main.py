@@ -8,7 +8,7 @@ from datetime import datetime
 
 from develop import web_scrape
 from card_validation import validate_card_name
-from models import ErrorResponse
+from models.mockResponse import ErrorResponse
 from fastapi.responses import JSONResponse
 import json
 
@@ -23,7 +23,6 @@ import json, os
 
 from develop import web_scrape
 from card_validation import validate_card_name
-from models import ErrorResponse
 
 app = FastAPI()
 
@@ -88,8 +87,9 @@ def get_mock_cards(scrape_request: List[ScrapeRequest]):
     errorCase = []
     
     for s in scrape_request:
-        if validate_card_name(s) == "Invalid Card Name":
-            errorCase.append(f"Card not found for {s}")
+        returnVal = validate_card_name(s) 
+        if returnVal[0] != "Valid Card Name":
+            errorCase.append(f"Card not found for {returnVal[1]}: Did you mean {returnVal[0]}?")
         else:
             continue
     if errorCase:
@@ -104,4 +104,11 @@ def get_mock_cards(scrape_request: List[ScrapeRequest]):
     with open("mock_cards.json", "r") as f:
         data = json.load(f)
     return JSONResponse(content=data)
+
+@app.get("/errorTest/{item_id}")
+async def read_item(item_id: str):
+    val = 1
+    if val == 1:
+        raise HTTPException(status_code=404, detail="hehe test number")
+    return {"val": val}
 

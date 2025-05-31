@@ -11,3 +11,6 @@ fastapi
 uvicorn[standard]
 selenium-stealth
 mtgsdk
+requests
+symspellpy
+setuptools
