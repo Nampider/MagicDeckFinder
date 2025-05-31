@@ -1,19 +1,11 @@
 
 from fastapi import FastAPI, HTTPException, status
 from fastapi.concurrency import run_in_threadpool
-from pydantic import BaseModel
-from typing import List
 import asyncio
 from datetime import datetime
-
-from develop import web_scrape
-from card_validation import validate_card_name
 from models.mockResponse import ErrorResponse
+from service.mockScrape import mockDataForm
 from fastapi.responses import JSONResponse
-import json
-
-
-from fastapi import FastAPI, HTTPException, status
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
@@ -57,10 +49,8 @@ def web_scrape_wrapper(search_term: str):
 
 
 async def limited_scrape(name: str):
-    # print(f"[START] {name}")
     async with semaphore:
         result = await run_in_threadpool(web_scrape_wrapper, name)
-    # print(f"[DONE] {name}")
     return result
 
 
@@ -85,13 +75,14 @@ async def scrape_data(scrape_request: List[ScrapeRequest]):
 @app.post("/mockScrape")
 def get_mock_cards(scrape_request: List[ScrapeRequest]):
     errorCase = []
-    
+    correctCase = []
+
     for s in scrape_request:
         returnVal = validate_card_name(s) 
         if returnVal[0] != "Valid Card Name":
             errorCase.append(f"Card not found for {returnVal[1]}: Did you mean {returnVal[0]}?")
         else:
-            continue
+            correctCase.append(mockDataForm(returnVal[1]))
     if errorCase:
         error_response = ErrorResponse(
             detail="Cards not found",
@@ -101,9 +92,8 @@ def get_mock_cards(scrape_request: List[ScrapeRequest]):
             status_code=status.HTTP_404_NOT_FOUND,
             detail=error_response.model_dump()
         )
-    with open("mock_cards.json", "r") as f:
-        data = json.load(f)
-    return JSONResponse(content=data)
+    elif correctCase:
+        return correctCase
 
 @app.get("/errorTest/{item_id}")
 async def read_item(item_id: str):
