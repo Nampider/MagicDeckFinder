@@ -27,19 +27,17 @@ def spellCheck(cardName: str) -> str:
 
     # Lookup entire phrase as a single token
     suggestions = sym_spell.lookup(normalize(cardName), Verbosity.CLOSEST, max_edit_distance=10)
-
     # if suggestions:
     #     print(suggestions[0].term)
     # else:
     #     print("No suggestion found.")
-    return suggestions[0].term
+    return suggestions[0].term if suggestions else cardName
 
 
 def validate_card_name(cardName: str) -> list[str]:
     cleanName = str(cardName).strip()[6:-1]
     fixed_name = spellCheck(cleanName)
-    # print("Returning fixed_nam")
-    # print(fixed_name)
+    
     response = requests.get(f"https://api.scryfall.com/cards/named?exact={cleanName}")
     data = json.loads(response.content.decode()).get("name")
     
