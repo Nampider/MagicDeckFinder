@@ -10,6 +10,8 @@ class Item(BaseModel):
     img_url: str
     stock: str
     store: str
+    condition: str
+    foil: bool
 
 class ErrorResponse(BaseModel):
     detail: str
