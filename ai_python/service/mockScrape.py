@@ -3,6 +3,7 @@ from models.mockResponse import Item
 import requests
 import json
 import random
+import uuid
 
 def mockDataForm(cardName):
     response = requests.get(f"https://api.scryfall.com/cards/named?exact={cardName}")
@@ -11,10 +12,11 @@ def mockDataForm(cardName):
     stock = str(round(random.uniform(1, 10)))
     foil = random.choice([True, False])
     condition = random.choice(["Mint", "Near-Mint", "Used"])
+    id = uuid.uuid4()
 
     print(dataImg)
 
-    item = Item(name=cardName, price = f"${price} USD", img_url=dataImg, stock=f"{stock} left", store="darksides", foil=foil, condition=condition)
+    item = Item(id = id, name=cardName, price = f"${price} USD", img_url=dataImg, stock=f"{stock} left", store="darksides", foil=foil, condition=condition)
     # print("Inside of the mockDataForm")
     # print(item)
     return item

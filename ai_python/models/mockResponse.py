@@ -3,8 +3,10 @@
 
 from pydantic import BaseModel
 from typing import List, Optional
+from uuid import UUID
 
 class Item(BaseModel):
+    id: UUID
     name: str
     price: str
     img_url: str
