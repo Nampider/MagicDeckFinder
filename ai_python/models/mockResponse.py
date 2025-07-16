@@ -14,6 +14,7 @@ class Item(BaseModel):
     store: str
     condition: str
     foil: bool
+    setName: str
 
 class ErrorResponse(BaseModel):
     detail: str
