@@ -10,7 +10,7 @@ class Item(BaseModel):
     name: str
     price: str
     img_url: str
-    stock: str
+    stock: int
     store: str
     condition: str
     foil: bool
